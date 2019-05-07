@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+set -eu
+
+defaults write com.runningwithcrayons.Alfred-Preferences-3 syncfolder -string "${DOTFILES_HOME}/alfred"

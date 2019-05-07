@@ -1,0 +1,9 @@
+{
+  "alfredsnippet" : {
+    "snippet" : "[link{cursor}]({clipboard})",
+    "dontautoexpand" : true,
+    "uid" : "F0CBBDC3-DA4D-4578-B378-6FCD70044CD8",
+    "name" : "Markdown Link",
+    "keyword" : "link"
+  }
+}

@@ -1,0 +1,253 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>bundleid</key>
+	<string>com.gustafson.william</string>
+	<key>category</key>
+	<string>Tools</string>
+	<key>connections</key>
+	<dict>
+		<key>23D44C18-E641-4CF3-B476-DFE823E5F9A7</key>
+		<array>
+			<dict>
+				<key>destinationuid</key>
+				<string>193E41BC-A632-4283-898A-23C2D10FD0CF</string>
+				<key>modifiers</key>
+				<integer>0</integer>
+				<key>modifiersubtext</key>
+				<string></string>
+				<key>vitoclose</key>
+				<false/>
+			</dict>
+		</array>
+		<key>68DEE6E1-9F67-4CF3-8042-621F90399282</key>
+		<array>
+			<dict>
+				<key>destinationuid</key>
+				<string>58D638D0-C097-4DDF-9156-3B7B39F39F26</string>
+				<key>modifiers</key>
+				<integer>0</integer>
+				<key>modifiersubtext</key>
+				<string></string>
+				<key>vitoclose</key>
+				<false/>
+			</dict>
+		</array>
+		<key>BB20B8E7-6120-4FBE-9C6C-60AC9EBBE2D1</key>
+		<array>
+			<dict>
+				<key>destinationuid</key>
+				<string>C66D76B8-97C8-43D4-8D30-B00982C22EB2</string>
+				<key>modifiers</key>
+				<integer>0</integer>
+				<key>modifiersubtext</key>
+				<string></string>
+				<key>vitoclose</key>
+				<false/>
+			</dict>
+		</array>
+	</dict>
+	<key>createdby</key>
+	<string>William C. Gustafson</string>
+	<key>description</key>
+	<string>Keep your Mac awake with Amphetamine.</string>
+	<key>disabled</key>
+	<false/>
+	<key>name</key>
+	<string>Amphetamine Control</string>
+	<key>objects</key>
+	<array>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>argumenttype</key>
+				<integer>1</integer>
+				<key>keyword</key>
+				<string>amp on</string>
+				<key>subtext</key>
+				<string>With duration (optional; ex: 1h 30m)</string>
+				<key>text</key>
+				<string>Turn Amphetamine On</string>
+				<key>withspace</key>
+				<true/>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.input.keyword</string>
+			<key>uid</key>
+			<string>68DEE6E1-9F67-4CF3-8042-621F90399282</string>
+			<key>version</key>
+			<integer>1</integer>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>applescript</key>
+				<string>on alfred_script(q)
+  tell application "Amphetamine"			if (q is not null) then				-- Start/activate the app			activate				set hoursOnly to no				if (q contains "h") and (q does not contain "m") then			set hoursOnly to yes		end if				-- Remove text from argument		set q to (do shell script "echo " &amp; q &amp; " | sed 's/hours//g'")		set q to (do shell script "echo " &amp; q &amp; " | sed 's/hour//g'")		set q to (do shell script "echo " &amp; q &amp; " | sed 's/minutes//g'")		set q to (do shell script "echo " &amp; q &amp; " | sed 's/h//g'")		set q to (do shell script "echo " &amp; q &amp; " | sed 's/m//g'")				set someHours to 0		set someMinutes to 0				if q contains " " then						-- Separate hours and minutes			set AppleScript's text item delimiters to " "			set someHours to text item 1 of q as number			set someMinutes to text item 2 of q as number			set AppleScript's text item delimiters to ""						-- Multiply &amp; add to get total seconds			set someHours to someHours * 60 * 60			set someMinutes to someMinutes * 60						set q to someHours + someMinutes					else -- No space, assume only minutes						if hoursOnly is yes then				set q to q * 60 * 60			else				set q to q * 60			end if					end if				turn on for q			else				turn on			end if	end tell
+end alfred_script</string>
+				<key>cachescript</key>
+				<false/>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.action.applescript</string>
+			<key>uid</key>
+			<string>58D638D0-C097-4DDF-9156-3B7B39F39F26</string>
+			<key>version</key>
+			<integer>1</integer>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>argumenttype</key>
+				<integer>2</integer>
+				<key>keyword</key>
+				<string>amp off</string>
+				<key>subtext</key>
+				<string></string>
+				<key>text</key>
+				<string>Turn Amphetamine Off</string>
+				<key>withspace</key>
+				<false/>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.input.keyword</string>
+			<key>uid</key>
+			<string>BB20B8E7-6120-4FBE-9C6C-60AC9EBBE2D1</string>
+			<key>version</key>
+			<integer>1</integer>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>applescript</key>
+				<string>on alfred_script(q)
+  
+	tell application "Amphetamine"			turn off		end tell
+
+end alfred_script</string>
+				<key>cachescript</key>
+				<false/>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.action.applescript</string>
+			<key>uid</key>
+			<string>C66D76B8-97C8-43D4-8D30-B00982C22EB2</string>
+			<key>version</key>
+			<integer>1</integer>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>argumenttype</key>
+				<integer>2</integer>
+				<key>keyword</key>
+				<string>amp help</string>
+				<key>subtext</key>
+				<string></string>
+				<key>text</key>
+				<string>Show help for Amphetamine Alfred commands</string>
+				<key>withspace</key>
+				<false/>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.input.keyword</string>
+			<key>uid</key>
+			<string>23D44C18-E641-4CF3-B476-DFE823E5F9A7</string>
+			<key>version</key>
+			<integer>1</integer>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>browser</key>
+				<string></string>
+				<key>spaces</key>
+				<string></string>
+				<key>url</key>
+				<string>http://instinctualflaw.uservoice.com/knowledgebase/articles/822579</string>
+				<key>utf8</key>
+				<true/>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.action.openurl</string>
+			<key>uid</key>
+			<string>193E41BC-A632-4283-898A-23C2D10FD0CF</string>
+			<key>version</key>
+			<integer>1</integer>
+		</dict>
+	</array>
+	<key>readme</key>
+	<string>Created by William C. Gustafson
+IF Apps 2016
+
+Download Amphetamine from the Mac App Store:
+https://itunes.apple.com/app/amphetamine/id937984704?mt=12
+
+Use this workflow to turn Amphetamine on/off.
+
+Keywords:
+Amphetamine on
+Amphetamine on [duration]
+Amphetamine off
+
+Example Keyword Usage:
+
+Amphetamine on (starts indefinite session)
+Amphetamine on 1h 30m (starts timed session for 1 hour and 30 minutes)
+Amphetamine on 1 30 (starts timed session for 1 hour and 30 minutes)
+Amphetamine on 30m (starts timed session for 30 minutes)
+Amphetamine on 30 (starts timed session for 30 minutes)
+
+Amphetamine off (ends any active sessions)
+
+http://instinctualflaw.uservoice.com/</string>
+	<key>uidata</key>
+	<dict>
+		<key>193E41BC-A632-4283-898A-23C2D10FD0CF</key>
+		<dict>
+			<key>xpos</key>
+			<integer>500</integer>
+			<key>ypos</key>
+			<real>250</real>
+		</dict>
+		<key>23D44C18-E641-4CF3-B476-DFE823E5F9A7</key>
+		<dict>
+			<key>xpos</key>
+			<integer>300</integer>
+			<key>ypos</key>
+			<real>250</real>
+		</dict>
+		<key>58D638D0-C097-4DDF-9156-3B7B39F39F26</key>
+		<dict>
+			<key>xpos</key>
+			<integer>500</integer>
+			<key>ypos</key>
+			<real>10</real>
+		</dict>
+		<key>68DEE6E1-9F67-4CF3-8042-621F90399282</key>
+		<dict>
+			<key>xpos</key>
+			<integer>300</integer>
+			<key>ypos</key>
+			<real>10</real>
+		</dict>
+		<key>BB20B8E7-6120-4FBE-9C6C-60AC9EBBE2D1</key>
+		<dict>
+			<key>xpos</key>
+			<integer>300</integer>
+			<key>ypos</key>
+			<real>130</real>
+		</dict>
+		<key>C66D76B8-97C8-43D4-8D30-B00982C22EB2</key>
+		<dict>
+			<key>xpos</key>
+			<integer>500</integer>
+			<key>ypos</key>
+			<real>130</real>
+		</dict>
+	</dict>
+	<key>webaddress</key>
+	<string>https://instinctualflaw.uservoice.com/</string>
+</dict>
+</plist>

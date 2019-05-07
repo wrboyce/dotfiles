@@ -1,0 +1,19 @@
+# ANSIBLE MANAGED FILE
+
+[include]
+    path = .gitconfig.d/alias.conf
+    path = .gitconfig.d/branch.conf
+    path = .gitconfig.d/color.conf
+    path = .gitconfig.d/core.conf
+    path = .gitconfig.d/credential.conf
+    path = .gitconfig.d/diff.conf
+    path = .gitconfig.d/git-flow.conf
+    path = .gitconfig.d/github.conf
+    path = .gitconfig.d/gmail.conf
+    path = .gitconfig.d/help.conf
+    path = .gitconfig.d/interactive.conf
+    path = .gitconfig.d/merge.conf
+    path = .gitconfig.d/push.conf
+    path = .gitconfig.d/rerere.conf
+    path = .gitconfig.d/sendemail.conf
+    path = .gitconfig.d/user.conf

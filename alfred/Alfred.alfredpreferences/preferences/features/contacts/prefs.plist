@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>customFields</key>
+	<array>
+		<dict>
+			<key>action</key>
+			<string>6BEDF161-D38D-4368-83ED-F2319AD5F378</string>
+			<key>schemeurl</key>
+			<string>tel://{query}</string>
+			<key>uid</key>
+			<string>alfred.contact.field.phone</string>
+		</dict>
+		<dict>
+			<key>action</key>
+			<string>default.urlscheme</string>
+			<key>schemeurl</key>
+			<string>mailto:{query}</string>
+			<key>uid</key>
+			<string>alfred.contact.field.email</string>
+		</dict>
+		<dict>
+			<key>action</key>
+			<string>DD5A46E8-58B2-4349-B8F0-6093A63E607F</string>
+			<key>schemeurl</key>
+			<string>gtalk:{query}</string>
+			<key>uid</key>
+			<string>alfred.contact.field.instant.googletalk</string>
+		</dict>
+		<dict>
+			<key>action</key>
+			<string>DD5A46E8-58B2-4349-B8F0-6093A63E607F</string>
+			<key>schemeurl</key>
+			<string>jabber:{query}</string>
+			<key>uid</key>
+			<string>alfred.contact.field.instant.jabber</string>
+		</dict>
+	</array>
+	<key>showJobTitle</key>
+	<true/>
+</dict>
+</plist>

@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+set -eu
+
+defaults write com.googlecode.iterm2 SUEnableAutomaticChecks -bool true
+defaults write com.googlecode.iterm2 PrefsCustomFolder -string "${DOTFILES_HOME}/iterm2/config"
+defaults write com.googlecode.iterm2 LoadPrefsFromCustomFolder -bool true

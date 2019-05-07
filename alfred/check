@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+set -eu
+
+name="alfred"
+if [ "$(defaults read com.runningwithcrayons.Alfred-Preferences-3 syncfolder)" = "${DOTFILES_HOME}/alfred" ]; then
+	_dotfile_info "'${name}' installed"
+else
+	_dotfile_warn "'${name}' missing"
+fi

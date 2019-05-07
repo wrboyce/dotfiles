@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+set -eu
+
+name="iterm2"
+if [ "$(defaults read com.googlecode.iterm2 PrefsCustomFolder)" = "${DOTFILES_HOME}/iterm2/config" ]; then
+	_dotfile_info "'${name}' installed"
+else
+	_dotfile_warn "'${name}' missing"
+fi

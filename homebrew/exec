@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+set -eu
+
+if [[ "${OSTYPE}" = darwin* ]]; then
+	if [ ! -d "/usr/local/Homebrew" ]; then
+		dotfile_info 'Installing Homebrew'
+		CI=1 exec /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+	fi
+
+	common_brewfile="$(dirname "${BASH_SOURCE[0]}")/Brewfiles/common"
+	host_brewfile="$(dirname "${BASH_SOURCE[0]}")/Brewfiles/$(hostname -s)"
+	dotfile_info "Generating ~/.Brewfile"
+	echo "## DOTFILES MANAGED FILE ##" > "${HOME}/.Brewfile"
+	cat "${common_brewfile}" >> "${HOME}/.Brewfile"
+	if [ -f "${host_brewfile}" ]; then
+		cat "${host_brewfile}" >> "${HOME}/.Brewfile"
+	fi
+fi

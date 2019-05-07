@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>customSites</key>
+	<dict>
+		<key>4D8BA952-2F8C-407F-AE5B-898528FF2317</key>
+		<dict>
+			<key>enabled</key>
+			<true/>
+			<key>keyword</key>
+			<string>vnc</string>
+			<key>text</key>
+			<string>VNC to</string>
+			<key>url</key>
+			<string>vnc://{query}</string>
+			<key>utf8</key>
+			<false/>
+		</dict>
+		<key>8FD0C8A3-B433-4355-ABBF-F23EF639691C</key>
+		<dict>
+			<key>enabled</key>
+			<false/>
+			<key>keyword</key>
+			<string>tw</string>
+			<key>text</key>
+			<string>Tweet…</string>
+			<key>url</key>
+			<string>twitter://post?message={query}</string>
+			<key>utf8</key>
+			<true/>
+		</dict>
+		<key>B6259BAB-4260-46AF-94B4-FD3E9F9588A8</key>
+		<dict>
+			<key>enabled</key>
+			<false/>
+			<key>keyword</key>
+			<string>gh</string>
+			<key>text</key>
+			<string>Search GitHub for</string>
+			<key>url</key>
+			<string>https://github.com/search?q={query}</string>
+			<key>utf8</key>
+			<true/>
+		</dict>
+	</dict>
+</dict>
+</plist>

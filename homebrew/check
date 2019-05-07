@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+set -eu
+
+name="homebrew"
+path="/usr/local/Homebrew"
+if [ -d "${path}" ]; then
+	_dotfile_info "'${name}' installed at ${path}"
+else
+	_dotfile_warn "'${name}' missing from ${path}"
+fi

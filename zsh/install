@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+set -eu
+
+curl -s https://raw.githubusercontent.com/wrboyce/oh-my-zsh-custom/zplugin/tools/install.sh | zsh
+zsh -ic true

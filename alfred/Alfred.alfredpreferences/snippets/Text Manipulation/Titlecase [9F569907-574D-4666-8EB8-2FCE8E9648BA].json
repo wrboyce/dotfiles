@@ -1,0 +1,9 @@
+{
+  "alfredsnippet" : {
+    "snippet" : "{clipboard:capitals}",
+    "dontautoexpand" : true,
+    "uid" : "9F569907-574D-4666-8EB8-2FCE8E9648BA",
+    "name" : "Titlecase",
+    "keyword" : "tc"
+  }
+}

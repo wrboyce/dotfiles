@@ -1,0 +1,319 @@
+#!/usr/bin/env bash
+set -eu
+
+DOTFILES_HOME="${DOTFILES_HOME-"${HOME}/.dotfiles"}"
+GITHUB_USERNAME="${GITHUB_USERNAME-"$(whoami)"}"
+DOTFILES_REPO="${DOTFILES_REPO-"git@github.com:${GITHUB_USERNAME}/dotfiles.git"}"
+
+COMMAND="${1-status}"
+if [ $# -gt 0 ]; then
+	shift
+fi
+
+if [ ! -d "${DOTFILES_HOME}" ]; then
+	COMMAND="install"
+fi
+
+# enable globstar for recursive globs
+shopt -s globstar
+# enable dotglob for hidden files
+shopt -s dotglob
+# skip internal files (README, .git, dotfiles directives)
+GLOBIGNORE="${DOTFILES_HOME}/README.md:${DOTFILES_HOME}/.git:${DOTFILES_HOME}/**/.dotfiles"
+
+# private logging functions: used by dotfiles script
+_dotfile_info () {
+	echo "$(tput bold)$(tput setaf 4)=>$(tput sgr0) $*"
+}
+
+_dotfile_warn () {
+	echo "$(tput bold)$(tput setaf 3)=>$(tput sgr0) $*"
+}
+
+# public logging functions: used by dotfiles packages
+dotfile_info () {
+	echo "$(tput bold)$(tput setaf 4)==>$(tput sgr0) $*"
+}
+
+dotfile_warn () {
+	echo "$(tput bold)$(tput setaf 3)==>$(tput sgr0) $*"
+}
+
+# resolve the package action, taking into account filters
+_dotfile_get_action () {
+	local action="link" src line filter_key filter_value filter_ok=true
+	src=$1
+	if [ -f "${src}/.dotfiles" ]; then
+		action="skip"
+		while read -r line; do
+			if [[ "${line}" = hostname=* ]] || [[ "${line}" = os=* ]]; then
+				IFS='=' read -r filter_key filter_value <<<"${line}"
+				case "${filter_key}" in
+					hostname)
+						filter_key="$(hostname -s)"
+						;;
+					os)
+						filter_key="${OSTYPE}"
+						case "${filter_value}" in
+							linux)
+								# shellcheck disable=SC2125
+								filter_value=linux*
+								;;
+							macos)
+								# shellcheck disable=SC2125
+								filter_value=darwin*
+								;;
+						esac
+						;;
+				esac
+				# shellcheck disable=SC2053
+				# update filter_ok to reflect the current filter chain status
+				if [ "${filter_ok}" = true ] && [[ "${filter_key}" = ${filter_value} ]]; then
+					filter_ok=true
+				else
+					filter_ok=false
+				fi
+			else
+				if [ "${filter_ok}" = true ]; then
+					action="${line}"
+				fi
+				# current filter chain is complete, reset status
+				filter_ok=true
+			fi
+		done <"${src}/.dotfiles"
+	fi
+	echo "${action}"
+}
+
+# get the package's installation destination
+_dotfile_get_dest () {
+	local cmd dst
+	cmd=$1
+	dst=$2
+	if [[ "${cmd}" = *=* ]]; then
+		IFS='=' read -r cmd dst <<<"${cmd}"
+	fi
+	echo "${dst/\~/${HOME}}"
+}
+
+# perform a `link` action on a package
+_dotfile_do_link () {
+	local src dst real
+	src=$1
+	dst=$2
+	if [ ! -e "${dst}" ]; then
+		_dotfile_info "Linking '$(basename "${src}")' to ${dst/${HOME}/\~}"
+		ln -s "${src}" "${dst}"
+	elif [ -L "${dst}" ]; then
+		real="$(realpath "${dst}")"
+		if [ "${real}" != "${src}" ]; then
+			_dotfile_info "Unlinking '${real}' from ${dst/${HOME}/\~}"
+			rm "${dst}"
+			_dotfile_info "Linking '$(basename "${src}")' to ${dst/${HOME}/\~}"
+			ln -s "${src}" "${dst}"
+		fi
+	else
+		_dotfile_warn "Skipping '$(basename "${src}")', destination ${dst/${HOME}/\~} exists"
+	fi
+}
+
+# perform a `copy` action on a package
+_dotfile_copy () {
+	local src dst
+	src=$1
+	dst=$2
+	if [ ! -e "${dst}" ]; then
+		_dotfile_info "Copying '$(basename "${src}")' to ${dst/"${HOME}"/~}"
+		echo cp "${src}" "${dst}"
+	fi
+}
+
+# handle a `git` type package
+_dotfile_git () {
+	local name dst remote
+	name=$1
+	dst=$2
+	remote=$3
+	if [ ! -d "${dst}" ]; then
+		if [ -f "${remote}" ]; then
+			remote="$(cat "${remote}")"
+		fi
+		if [ -n "${remote}" ] && [[ "${remote}" != /* ]]; then
+			_dotfile_info "Cloning '${name}' from '${remote}' to ${dst/${HOME}/\~}"
+			git clone --recursive --quiet "${remote}" "${dst}"
+		fi
+	else
+		if [ -e "${dst}/.git" ]; then
+			_dotfile_info "Updating '${name}' at ${dst/${HOME}/\~}"
+			git -C "${dst}" pull --quiet
+		fi
+	fi
+}
+
+# perform `exec` type actions
+_dotfile_exec () {
+	local script
+	script="$1"; shift
+	if [ -f "${script}" ]; then
+		_dotfile_info "Executing '$(basename "$(dirname "${script}")")/$(basename "${script}")'..."
+		# shellcheck disable=SC1090
+		source "${script}" "$@"
+	fi
+}
+
+# handle `install` and `update` commands
+do_install () {
+	_dotfile_git dotfiles "${DOTFILES_HOME}" "${DOTFILES_REPO}"
+
+	local path name dest action child postexecs
+	postexecs=()
+	for path in "${DOTFILES_HOME}/"*; do
+		name="$(basename "${path}")"
+		dest="${HOME}/.${name}"
+
+		if [ -d "${path}" ]; then
+			action="$(_dotfile_get_action "${path}")"
+			case "${action}" in
+				skip)
+					_dotfile_info "=> Skipping '${name}'"
+					;;
+				link|link=*)
+					dest="$(_dotfile_get_dest "${action}" "${dest}")"
+					_dotfile_do_link "${path}" "${dest}"
+					;;
+				linkfiles|linkfiles=*)
+					dest="$(_dotfile_get_dest "${action}" "${dest}")"
+					for child in "${path}/"*; do
+						_dotfile_do_link "${path}" "${dest}"
+					done
+					;;
+				copyfiles|copyfiles=*)
+					dest="$(_dotfile_get_dest "${action}" "${dest}")"
+					for child in "${path}/"*; do
+						_dotfile_copy "${child}" "${dest}/$(basename "${child}")"
+					done
+					;;
+				exec|"${COMMAND}exec")
+					for child in "${path}/"*; do
+						_dotfile_exec "${child}" "$@"
+					done
+					;;
+				postexec|"post${COMMAND}exec")
+					for child in "${path}/"*; do
+						postexecs+=("${child}")
+					done
+					;;
+				mod)
+					_dotfile_git "${name}" "${dest}" "${path}/repo"
+					_dotfile_exec "${path}/exec" "$@"
+					_dotfile_exec "${path}/${COMMAND}" "$@"
+					postexecs+=("${path}/postexec")
+					postexecs+=("${path}/post${COMMAND}")
+					;;
+				*)
+					;;
+			esac
+		else
+			case "${name}" in
+				*.git)
+					_dotfile_git "${name}" "${dest}" "${path}"
+					;;
+				*)
+					_dotfile_do_link "${path}" "${dest}"
+					;;
+			esac
+		fi
+	done
+
+	for child in "${postexecs[@]}"; do
+		_dotfile_exec "${child}" "$@"
+	done
+}
+
+# handle `status` command
+do_status () {
+	local path name dest action real child child_dest real postexecs
+	postexecs=()
+	for path in "${DOTFILES_HOME}/"*; do
+		name="$(basename "${path}")"
+		dest="${HOME}/.${name}"
+
+		if [ -d "${path}" ]; then
+			action="$(_dotfile_get_action "${path}")"
+			case "${action}" in
+				link|link=*)
+					dest="$(_dotfile_get_dest "${action}" "${dest}")"
+					real="$(realpath "${dest}")"
+					if [ -L "${dest}" ] && [ "${real}" = "${path}" ]; then
+						_dotfile_info "'${name}' linked to ${dest/${HOME}/\~}"
+					else
+						_dotfile_warn "'${name}' missing from ${dest/${HOME}\~}"
+					fi
+					;;
+				# TODO: linkfiles
+				copyfiles|copyfiles=*)
+					dest="$(_dotfile_get_dest "${action}" "${dest}")"
+					for child in "${path}/"*; do
+						child_dest="${dest}/$(basename "${child}")"
+						if cmp "${child}" "${child_dest}" 2>/dev/null; then
+							_dotfile_info "'${child/$DOTFILES_HOME\//}' installed at ${child_dest/${HOME}/\~}"
+						else
+							_dotfile_info "'${child/$DOTFILES_HOME\//}' differs from ${child_dest/${HOME}/\~}"
+						fi
+					done
+					;;
+				mod)
+					if [ -f "${path}/check" ]; then
+						# shellcheck disable=SC1090
+						source "${path}/check"
+					elif [ -d "${dest}" ]; then
+						status="installed"
+						if [ -f "${path}/repo" ]; then
+							status="installed and cloned"
+						fi
+						_dotfile_info "'${name}' ${status} at ${dest/${HOME}/\~}"
+					else
+						_dotfile_warn "'${name}' missing from ${dest/${HOME}/\~}"
+					fi
+					;;
+			esac
+		else
+			case "${name}" in
+				*.git)
+					if [ -d "${dest}/.git" ]; then
+						_dotfile_info "'${name%%.git}' cloned at ${dest/${HOME}/\~}"
+					else
+						_dotfile_warn "'${name}' missing from ${dest/${HOME}/\~}"
+					fi
+					;;
+				*)
+					real="$(realpath "${dest}")"
+					if [ -L "${dest}" ] && [ "${real}" = "${path}" ]; then
+						_dotfile_info "'${name}' linked to ${dest/${HOME}/\~}"
+					else
+						_dotfile_warn "'${name}' missing from ${dest/${HOME}/\~}"
+					fi
+					;;
+			esac
+		fi
+	done
+}
+
+# main dotfiles script entry point
+main () {
+	case "${COMMAND}" in
+		install|update)
+			do_install "$@"
+			;;
+		status)
+			do_status "$@"
+			;;
+		*)
+			echo "USAGE: dotfiles <install|update|status> [args]" >&2
+			exit 1
+			;;
+	esac
+}
+
+# do this last so we know the script is loaded (e.g., when running via curl)
+main "$@"

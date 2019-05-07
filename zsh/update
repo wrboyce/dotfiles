@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+set -eu
+
+git -C ~/.zsh pull --quiet
+zsh -ic 'zplugin self-update'
+zsh -ic 'zplugin update --all --quiet'

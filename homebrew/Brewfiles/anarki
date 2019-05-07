@@ -1,0 +1,5 @@
+# vim: set ft=ruby
+cask "balenaetcher"
+cask "flowdock"
+cask "front"
+cask "zoomus"
